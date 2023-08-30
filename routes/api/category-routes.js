@@ -14,8 +14,7 @@ router.get('/', async (req, res) => {
     })
 
     return {
-      id: category.dataValues.id,
-      categoryName: category.dataValues.categoryName,
+      ...category.dataValues,
       products: products
     }
   }))
@@ -23,9 +22,31 @@ router.get('/', async (req, res) => {
   res.status(200).json(categories);
 });
 
-router.get('/:id', (req, res) => {
-  // find one category by its `id` value
-  // be sure to include its associated Products
+router.get('/:id', async (req, res) => {
+  const id = req.params.id
+
+  let results = await Category.findAll({
+    where: {
+      id: id
+    }
+  })
+
+  if (results.length === 0) {
+    res.status(404).json({ error: 'Invalid Id Provided' })
+  } else {
+    let category = results[0]
+
+    let products = await Product.findAll({
+      where: {
+        categoryId: category.dataValues.id
+      }
+    })
+  
+    res.status(200).json({
+      ...category.dataValues,
+      products: products
+    });
+  }
 });
 
 router.post('/', (req, res) => {
