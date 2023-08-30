@@ -49,8 +49,18 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post('/', (req, res) => {
-  // create a new category
+router.post('/', async (req, res) => {
+  if (req.body.categoryName === undefined) {
+    res.status(400).json({ error: 'Missing Category Name' })
+  } else if (typeof req.body.categoryName !== 'string') {
+    res.status(400).json({ error: 'Invalid Category Name' })
+  } else {
+    let results = await Category.create({
+      ...req.body
+    })
+  
+    res.status(200).json({ message: 'Success!' })
+  }
 });
 
 router.put('/:id', (req, res) => {
