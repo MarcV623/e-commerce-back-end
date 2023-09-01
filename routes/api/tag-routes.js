@@ -3,9 +3,23 @@ const { Tag, Product, ProductTag } = require('../../models');
 
 // The `/api/tags` endpoint
 
-router.get('/', (req, res) => {
-  // find all tags
-  // be sure to include its associated Product data
+router.get('/', async (req, res) => {
+  let tags = await Tag.findAll()
+
+  tags = await Promise.all(tags.map(async tag => {
+    let products = await Product.findAll({
+      where: {
+        categoryId: category.dataValues.id
+      }
+    })
+
+    return {
+      ...tag.dataValues,
+      products: products
+    }
+  }))
+
+  res.status(200).json(tags);
 });
 
 router.get('/:id', (req, res) => {
@@ -21,8 +35,16 @@ router.put('/:id', (req, res) => {
   // update a tag's name by its `id` value
 });
 
-router.delete('/:id', (req, res) => {
-  // delete on tag by its `id` value
+router.delete('/:id', async (req, res) => {
+  const id = req.params.id
+
+  let results = await Tag.destroy({
+    where: {
+      id: id
+    }
+  })
+
+  res.status(200).json({})
 });
 
 module.exports = router;
